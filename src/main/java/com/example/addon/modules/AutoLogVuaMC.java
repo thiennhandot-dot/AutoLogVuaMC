@@ -23,7 +23,7 @@ public class AutoLogVuaMC extends Module {
     private boolean logged = false;
 
     public AutoLogVuaMC() {
-        super(Categories.Misc, "auto-log-vuamc", "Tự động login server VuaMC");
+        super(Categories.Misc, "auto-log-vuamc", "Auto login server VuaMC");
     }
 
     @Override
@@ -43,13 +43,11 @@ public class AutoLogVuaMC extends Module {
             logged = true;
         }
 
-        if (logged && timer >= 100) {
+        if (logged && timer == 100) {
             for (int i = 0; i < 9; i++) {
                 if (mc.player.getInventory().getStack(i).getItem() == Items.COMPASS) {
-
-                    mc.player.getInventory().setSelectedSlot(i);
+                    mc.player.getInventory().selectedSlot = i;
                     mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-
                     break;
                 }
             }
