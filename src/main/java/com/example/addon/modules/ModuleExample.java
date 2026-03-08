@@ -11,81 +11,59 @@ import net.minecraft.util.Hand;
 /* * ==========================================
  * PROJECT: AutoLogVuaMC x Camdzs1tg
  * WARNING: Thang nao mo code nay ra xem la con cho :))
- * busuc5chuc
  * ==========================================
  */
 
 public class ModuleExample extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    // --- PHAN DIEU CHINH (code muon ia chay) ---
-
     private final Setting<String> password = sgGeneral.add(new StringSetting.Builder()
         .name("mat-khau")
-        .description("Nhap pass vao day, dung de lo cho ai nhe")
+        .description("Nhap pass vao day")
         .defaultValue("123456")
         .build());
 
     private final Setting<Integer> loginDelay = sgGeneral.add(new IntSetting.Builder()
-        .name("do-tre-ms")
-        .description("Cho may giay roi moi dang nhap")
-        .defaultValue(1500)
+        .name("do-tre-tick")
+        .description("20 ticks = 1 giay")
+        .defaultValue(40)
         .min(0)
-        .sliderMax(5000)
-        .build());
-
-    private final Setting<Boolean> autoCompass = sgGeneral.add(new BoolSetting.Builder()
-        .name("tu-mo-la-ban")
-        .description("Vao la cam la ban len quat luon")
-        .defaultValue(true)
+        .sliderMax(200)
         .build());
 
     private int timer;
     private boolean daLogin;
 
     public ModuleExample() {
-        // Ten Module hien thi trong tab Misc cua Meteor
-        super(Categories.Misc, "AutoLogVuaMC", "Auto login cho server VuaMC - Mod by Kadeer");
+        super(Categories.Misc, "AutoLogVuaMC", "Auto login VuaMC - Mod by Kadeer");
     }
 
     @Override
     public void onActivate() {
         timer = 0;
         daLogin = false;
-        info("Module da bat! Dang doi den gio 'hanh quyet'..."); 
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (mc.player == null) return;
+        timer++;
 
-        timer++; 
-
-        // 1. Logic tu dong dang nhap
-        if (!daLogin && timer >= (loginDelay.get() / 50)) {
+        if (!daLogin && timer >= loginDelay.get()) {
             mc.player.networkHandler.sendChatCommand("login " + password.get());
-            daLogin = true; 
-            info("Da gui pass! Hy vong ko bi sai..."); 
+            daLogin = true;
+            info("Da gui mat khau!");
         }
 
-        // 2. Logic tu dong cam La ban va Chuot phai
-        if (autoCompass.get() && daLogin && timer == (loginDelay.get() / 50) + 20) {
-            
-            int slotLaBan = -1;
+        if (daLogin && timer == loginDelay.get() + 20) {
             for (int i = 0; i < 9; i++) {
                 if (mc.player.getInventory().getStack(i).getItem() == Items.COMPASS) {
-                    slotLaBan = i;
+                    mc.player.getInventory().selectedSlot = i;
+                    mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+                    info("Da mo La Ban!");
                     break;
                 }
             }
-
-            if (slotLaBan != -1) {
-                mc.player.getInventory().selectedSlot = slotLaBan; 
-                mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND); 
-                info("Da mo menu chon cum! Chon nhanh keo bi kick!");
-            } else {
-                warning("Deo thay cai la ban nao ca! May vut di dau roi?");
-            }
         }
     }
-                }
+}
