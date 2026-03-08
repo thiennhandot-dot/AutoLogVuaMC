@@ -8,8 +8,11 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 
-/* * PROJECT: AutoLogVuaMC x Camdzs1tg
+/* * ==========================================
+ * PROJECT: AutoLogVuaMC x Camdzs1tg
  * WARNING: Thang nao mo code nay ra xem la con cho :))
+ * busuc5chuc
+ * ==========================================
  */
 
 public class ModuleExample extends Module {
@@ -17,7 +20,17 @@ public class ModuleExample extends Module {
 
     private final Setting<String> password = sgGeneral.add(new StringSetting.Builder()
         .name("mat-khau")
+        .description("Nhap pass vao day, dung de lo cho ai nhe")
         .defaultValue("123456")
+        .build()
+    );
+
+    private final Setting<Integer> loginDelay = sgGeneral.add(new IntSetting.Builder()
+        .name("do-tre-ms")
+        .description("Cho may giay roi moi dang nhap")
+        .defaultValue(1500)
+        .min(0)
+        .sliderMax(5000)
         .build()
     );
 
@@ -25,35 +38,41 @@ public class ModuleExample extends Module {
     private boolean daLogin;
 
     public ModuleExample() {
-        super(Categories.Misc, "AutoLogVuaMC", "Auto login VuaMC - Mod by Kadeer");
+        super(Categories.Misc, "AutoLogVuaMC", "Auto login cho server VuaMC - Mod by Kadeer");
     }
 
     @Override
     public void onActivate() {
         timer = 0;
         daLogin = false;
+        info("Module da bat! Dang doi den gio 'hanh quyet'..."); 
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (mc.player == null) return;
-        timer++;
+        timer++; 
 
-        // Tu dong gui lenh login sau 3 giay (60 ticks)
-        if (!daLogin && timer >= 60) {
+        if (!daLogin && timer >= (loginDelay.get() / 50)) {
             mc.player.networkHandler.sendChatCommand("login " + password.get());
-            daLogin = true;
+            daLogin = true; 
+            info("Da gui pass! Hy vong ko bi sai..."); 
         }
 
-        // Tu dong cam la ban va click chuot phai sau khi login
-        if (daLogin && timer == 100) {
+        if (daLogin && timer == (loginDelay.get() / 50) + 20) {
+            int slotLaBan = -1;
             for (int i = 0; i < 9; i++) {
                 if (mc.player.getInventory().getStack(i).getItem() == Items.COMPASS) {
-                    mc.player.getInventory().selectedSlot = i;
-                    mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+                    slotLaBan = i;
                     break;
                 }
             }
+
+            if (slotLaBan != -1) {
+                mc.player.getInventory().selectedSlot = slotLaBan; 
+                mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND); 
+                info("Da mo menu chon cum! Chon nhanh keo bi kick!");
+            }
         }
     }
-            }
+}
