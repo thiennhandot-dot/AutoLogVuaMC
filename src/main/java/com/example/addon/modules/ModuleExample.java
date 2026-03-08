@@ -1,12 +1,9 @@
 package com.example.addon.modules;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
-import meteordevelopment.meteorclient.settings.StringSetting;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
@@ -15,47 +12,51 @@ public class ModuleExample extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<String> password = sgGeneral.add(new StringSetting.Builder()
-        .name("mat-khau")
-        .description("Mat khau cua ban")
+        .name("password")
+        .description("Password để tự động login.")
         .defaultValue("123456")
         .build()
     );
 
-    private int timer;
-    private boolean daLogin;
+    private int timer = 0;
+    private boolean loggedIn = false;
 
     public ModuleExample() {
-        super(Categories.Misc, "AutoLogVuaMC", "Auto login - Mod by Kadeer");
+        super(Categories.Misc, "AutoLogVuaMC", "Tự động login và mở compass.");
     }
 
     @Override
     public void onActivate() {
         timer = 0;
-        daLogin = false;
+        loggedIn = false;
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.player == null) return;
+        if (mc.player == null || mc.world == null) return;
+
         timer++;
 
-        // Su dung ChatUtils cua Meteor de KHONG BI LOI phien ban MC
-        if (!daLogin && timer >= 60) {
-            ChatUtils.sendPlayerMsg("/login " + password.get());
-            daLogin = true;
+        // Auto login sau ~3 giây
+        if (!loggedIn && timer >= 60) {
+            mc.player.networkHandler.sendChatCommand("login " + password.get());
+            loggedIn = true;
         }
 
-        // Sau khi login 2 giay, tu dong tim va bam La ban
-        if (daLogin && timer == 100) {
+        // Mở compass sau khi login
+        if (loggedIn && timer >= 100) {
             for (int i = 0; i < 9; i++) {
                 if (mc.player.getInventory().getStack(i).getItem() == Items.COMPASS) {
                     mc.player.getInventory().selectedSlot = i;
+
                     if (mc.interactionManager != null) {
                         mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
                     }
+
+                    toggle(); // tắt module sau khi dùng
                     break;
                 }
             }
         }
     }
-}
+                        }
