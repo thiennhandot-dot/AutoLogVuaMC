@@ -1,56 +1,36 @@
-package com.example.addon.modules;
+package com.example.addon;
 
-import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.modules.Categories;
-import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.orbit.EventHandler;
-import net.minecraft.item.Items;
-import net.minecraft.util.Hand;
+import com.example.addon.modules.AutoLogVuaMC;
+import com.mojang.logging.LogUtils;
+import meteordevelopment.meteorclient.addons.GithubRepo;
+import meteordevelopment.meteorclient.addons.MeteorAddon;
+import meteordevelopment.meteorclient.systems.modules.Category;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import org.slf4j.Logger;
 
-public class AutoLogVuaMC extends Module {
+public class AddonTemplate extends MeteorAddon {
+    public static final Logger LOG = LogUtils.getLogger();
+    public static final Category CATEGORY = new Category("AutoLogVuaMC");
 
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    @Override
+    public void onInitialize() {
+        LOG.info("Loading AutoLogVuaMC Addon");
 
-    private final Setting<String> password = sgGeneral.add(new StringSetting.Builder()
-        .name("password")
-        .description("Password để login")
-        .defaultValue("123456")
-        .build()
-    );
-
-    private int timer = 0;
-    private boolean logged = false;
-
-    public AutoLogVuaMC() {
-        super(Categories.Misc, "auto-log-vuamc", "Auto login server VuaMC");
+        Modules.get().add(new AutoLogVuaMC());
     }
 
     @Override
-    public void onActivate() {
-        timer = 0;
-        logged = false;
+    public void onRegisterCategories() {
+        Modules.registerCategory(CATEGORY);
     }
 
-    @EventHandler
-    private void onTick(TickEvent.Post event) {
-        if (mc.player == null) return;
+    @Override
+    public String getPackage() {
+        return "com.example.addon";
+    }
 
-        timer++;
-
-        if (!logged && timer >= 60) {
-            mc.player.networkHandler.sendChatCommand("login " + password.get());
-            logged = true;
-        }
-
-        if (logged && timer == 100) {
-            for (int i = 0; i < 9; i++) {
-                if (mc.player.getInventory().getStack(i).getItem() == Items.COMPASS) {
-                    mc.player.getInventory().selectedSlot = i;
-                    mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-                    break;
-                }
-            }
-        }
+    @Override
+    public GithubRepo getRepo() {
+        return new GithubRepo("thiennhandot-dot", "AutoLogVuaMC");
     }
 }
