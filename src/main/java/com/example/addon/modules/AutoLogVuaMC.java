@@ -1,4 +1,4 @@
-package com.example.modules;
+package com.example.addon.modules;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -9,19 +9,21 @@ import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 
 public class AutoLogVuaMC extends Module {
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<String> password = sgGeneral.add(new StringSetting.Builder()
         .name("password")
+        .description("Password để login")
         .defaultValue("123456")
         .build()
     );
 
-    private int timer = 0;
-    private boolean logged = false;
+    private int timer;
+    private boolean logged;
 
     public AutoLogVuaMC() {
-        super(Categories.Misc, "auto-log-vuamc", "Auto login VuaMC");
+        super(Categories.Misc, "auto-log-vuamc", "Tự động login và mở compass server VuaMC");
     }
 
     @Override
@@ -44,11 +46,13 @@ public class AutoLogVuaMC extends Module {
         if (logged && timer == 100) {
             for (int i = 0; i < 9; i++) {
                 if (mc.player.getInventory().getStack(i).getItem() == Items.COMPASS) {
-                    mc.player.getInventory().selectedSlot = i;
+
+                    mc.player.getInventory().setSelectedSlot(i);
                     mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+
                     break;
                 }
             }
         }
     }
-                 }
+}
