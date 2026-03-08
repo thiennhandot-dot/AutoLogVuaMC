@@ -19,11 +19,11 @@ public class AutoLogVuaMC extends Module {
         .build()
     );
 
-    private int timer;
-    private boolean logged;
+    private int timer = 0;
+    private boolean logged = false;
 
     public AutoLogVuaMC() {
-        super(Categories.Misc, "auto-log-vuamc", "Tự động login và mở compass server VuaMC");
+        super(Categories.Misc, "auto-log-vuamc", "Tự động login server VuaMC");
     }
 
     @Override
@@ -43,7 +43,7 @@ public class AutoLogVuaMC extends Module {
             logged = true;
         }
 
-        if (logged && timer == 100) {
+        if (logged && timer >= 100) {
             for (int i = 0; i < 9; i++) {
                 if (mc.player.getInventory().getStack(i).getItem() == Items.COMPASS) {
 
