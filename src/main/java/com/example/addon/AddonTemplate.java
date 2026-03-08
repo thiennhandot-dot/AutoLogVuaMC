@@ -33,4 +33,4 @@ public class AddonTemplate extends MeteorAddon {
     public GithubRepo getRepo() {
         return new GithubRepo("thiennhandot-dot", "AutoLogVuaMC");
     }
-}
+    }
